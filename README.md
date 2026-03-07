@@ -29,6 +29,7 @@ ACID=网关号码
 4. 程序会在系统托盘常驻，断网后自动尝试重连。
 
 退出方式：右下角托盘图标菜单中点击“退出程序”。
+<img width="339" height="123" alt="image" src="https://github.com/user-attachments/assets/927d3cb2-e8b0-4ed3-a13c-d6c667be8b28" />
 
 ---
 
@@ -51,6 +52,7 @@ chmod +x /usr/bin/srunlogin
 
 3. 上传并配置 `account.ini`。
 4. 运行程序，建议配合 OpenWrt 的启动项（如 `rc.local` 或 procd）实现开机自启。
+<img width="971" height="318" alt="image" src="https://github.com/user-attachments/assets/d66d79e5-ee9e-49d0-b0e6-085dfbf35a86" />
 
 ---
 
