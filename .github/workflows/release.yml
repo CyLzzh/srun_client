@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release 版本号（例如 v0.0.2）'
+        description: 'Release version (example: v0.0.2)'
         required: true
         default: 'v0.0.2'
       notes:
-        description: 'Release 说明（可选）'
+        description: 'Release notes (optional)'
         required: false
         default: ''
 
