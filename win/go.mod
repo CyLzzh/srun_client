@@ -5,6 +5,7 @@ go 1.25.1
 require (
 	github.com/getlantern/systray v1.2.2
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
+	golang.org/x/sys v0.36.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -19,5 +20,4 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
-	golang.org/x/sys v0.36.0 // indirect
 )

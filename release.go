@@ -55,55 +55,37 @@ func main() {
 	winBuildDir := filepath.Join(root, "win")
 	openwrtBuildDir := filepath.Join(root, "openwrt")
 
-	stageWin := filepath.Join(distDir, "stage-win")
-	stageArm64 := filepath.Join(distDir, "stage-openwrt-arm64")
-	stageMipsle := filepath.Join(distDir, "stage-openwrt-mipsle")
-	for _, dir := range []string{stageWin, stageArm64, stageMipsle} {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			fatal(fmt.Errorf("创建临时目录失败 (%s): %w", dir, err))
-		}
-	}
+	winExe := filepath.Join(distDir, fmt.Sprintf("CampusNet-windows-amd64-%s.exe", version))
+	arm64Bin := filepath.Join(distDir, fmt.Sprintf("srunlogin-openwrt-arm64-%s", version))
+	mipsleBin := filepath.Join(distDir, fmt.Sprintf("srunlogin-openwrt-mipsle-%s", version))
 
-	fmt.Println("[1/8] 构建 Windows 版本...")
+	fmt.Println("[1/6] 构建 Windows 版本...")
 	if err := invokeGoBuild(buildTarget{
 		workDir: winBuildDir,
 		env: map[string]string{
 			"GOOS":   "windows",
 			"GOARCH": "amd64",
 		},
-		output:  filepath.Join(stageWin, "CampusNet.exe"),
+		output:  winExe,
 		ldflags: "-s -w -H windowsgui",
 	}); err != nil {
 		fatal(err)
 	}
 
-	fmt.Println("[2/8] 拷贝 Windows 配置文件...")
-	if err := copyFile(filepath.Join(winBuildDir, "account.ini"), filepath.Join(stageWin, "account.ini")); err != nil {
-		fatal(err)
-	}
-	if _, err := os.Stat(filepath.Join(winBuildDir, "info.htm")); err == nil {
-		if err := copyFile(filepath.Join(winBuildDir, "info.htm"), filepath.Join(stageWin, "info.htm")); err != nil {
-			fatal(err)
-		}
-	}
-
-	fmt.Println("[3/8] 构建 OpenWrt arm64 版本...")
+	fmt.Println("[2/6] 构建 OpenWrt arm64 版本...")
 	if err := invokeGoBuild(buildTarget{
 		workDir: openwrtBuildDir,
 		env: map[string]string{
 			"GOOS":   "linux",
 			"GOARCH": "arm64",
 		},
-		output:  filepath.Join(stageArm64, "srunlogin"),
+		output:  arm64Bin,
 		ldflags: "-s -w",
 	}); err != nil {
 		fatal(err)
 	}
-	if err := copyFile(filepath.Join(openwrtBuildDir, "account.ini"), filepath.Join(stageArm64, "account.ini")); err != nil {
-		fatal(err)
-	}
 
-	fmt.Println("[4/8] 构建 OpenWrt mipsle 版本...")
+	fmt.Println("[3/6] 构建 OpenWrt mipsle 版本...")
 	if err := invokeGoBuild(buildTarget{
 		workDir: openwrtBuildDir,
 		env: map[string]string{
@@ -111,52 +93,23 @@ func main() {
 			"GOARCH": "mipsle",
 			"GOMIPS": "softfloat",
 		},
-		output:  filepath.Join(stageMipsle, "srunlogin"),
+		output:  mipsleBin,
 		ldflags: "-s -w",
 	}); err != nil {
 		fatal(err)
 	}
-	if err := copyFile(filepath.Join(openwrtBuildDir, "account.ini"), filepath.Join(stageMipsle, "account.ini")); err != nil {
-		fatal(err)
-	}
 
-	winZip := filepath.Join(distDir, fmt.Sprintf("CampusNet-windows-amd64-%s.zip", version))
-	arm64Tar := filepath.Join(distDir, fmt.Sprintf("srunlogin-openwrt-arm64-%s.tar.gz", version))
-	mipsleTar := filepath.Join(distDir, fmt.Sprintf("srunlogin-openwrt-mipsle-%s.tar.gz", version))
-
-	fmt.Println("[5/8] 打包 Windows ZIP...")
-	if err := createZipFromDir(stageWin, winZip); err != nil {
-		fatal(err)
-	}
-
-	fmt.Println("[6/8] 打包 OpenWrt tar.gz...")
-	if err := createTarGzFromDir(stageArm64, arm64Tar); err != nil {
-		fatal(err)
-	}
-	if err := createTarGzFromDir(stageMipsle, mipsleTar); err != nil {
-		fatal(err)
-	}
-
-	if err := os.RemoveAll(stageWin); err != nil {
-		fatal(fmt.Errorf("删除临时目录失败: %w", err))
-	}
-	if err := os.RemoveAll(stageArm64); err != nil {
-		fatal(fmt.Errorf("删除临时目录失败: %w", err))
-	}
-	if err := os.RemoveAll(stageMipsle); err != nil {
-		fatal(fmt.Errorf("删除临时目录失败: %w", err))
-	}
-
-	fmt.Println("[7/8] 创建并推送 Git tag...")
+	fmt.Println("[4/6] 创建并推送 Git tag...")
 	if err := ensureAndPushTag(root, version); err != nil {
 		fatal(err)
 	}
 
-	fmt.Println("[8/8] 上传至 GitHub Releases...")
-	if err := uploadToGitHubRelease("CyLzzh/srun_client", version, []string{winZip, arm64Tar, mipsleTar}); err != nil {
+	fmt.Println("[5/6] 上传可执行文件至 GitHub Releases...")
+	if err := uploadToGitHubRelease("CyLzzh/srun_client", version, []string{winExe, arm64Bin, mipsleBin}); err != nil {
 		fmt.Fprintf(os.Stderr, "警告: 上传 GitHub Releases 失败: %v\n", err)
 	}
 
+	fmt.Println("[6/6] 输出产物列表...")
 	fmt.Println()
 	fmt.Printf("Release 打包完成，产物目录: %s\n", distDir)
 	fmt.Printf("Git tag 已推送: %s\n", version)
