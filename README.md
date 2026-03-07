@@ -62,13 +62,5 @@ chmod +x /usr/bin/srunlogin
 
 ---
 
-## 开发者发布（可选）
-
-仓库根目录的 `release.ps1` 可一键构建并打包 Windows + OpenWrt：
-
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\release.ps1 -Version v0.1.0
-```
-
-产物位于 `dist/v0.1.0/`。
+## 鸣谢
+[caterpie_szu_srun_client](https://github.com/Caterpie771881/szu_srun_client)
