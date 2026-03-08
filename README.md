@@ -3,7 +3,7 @@
 
 ## 适合谁用
 
-- 你使用的是 Srun 校园网认证。
+- 你使用的是[海大 Srun 校园网认证](https://dagongren.tech:44095/info.htm)。
 - 你希望设备断网后自动重连，不想每次手动登录。
 
 ## 使用前准备
@@ -14,10 +14,10 @@
 [default]
 user=你的学号或账号
 passwd=你的密码
-ACID=你的运营商ID
+ACID=网关号码
 ```
 
-> `ACID` 与学校网络出口/运营商有关，不确定时可先用学校原客户端登录后确认。
+> `ACID` 网关号码，与登录地点有关，先退出校园网登录，等自动弹出校园网网页，在链接里面可以找到acid=xxx
 
 ---
 
@@ -29,6 +29,7 @@ ACID=你的运营商ID
 4. 程序会在系统托盘常驻，断网后自动尝试重连。
 
 退出方式：右下角托盘图标菜单中点击“退出程序”。
+<img width="339" height="123" alt="image" src="https://github.com/user-attachments/assets/927d3cb2-e8b0-4ed3-a13c-d6c667be8b28" />
 
 ---
 
@@ -51,30 +52,21 @@ chmod +x /usr/bin/srunlogin
 
 3. 上传并配置 `account.ini`。
 4. 运行程序，建议配合 OpenWrt 的启动项（如 `rc.local` 或 procd）实现开机自启。
+<img width="971" height="318" alt="image" src="https://github.com/user-attachments/assets/d66d79e5-ee9e-49d0-b0e6-085dfbf35a86" />
 
 ---
 
-## 发布（维护者）
-
-在仓库根目录执行：
-
-```sh
-go run release.go
-```
-
-- 脚本会提示输入版本号（也可使用 `go run release.go -version v1.2.3`）。
-- 自动构建 Windows / OpenWrt（arm64、mipsle）并打包到 `dist/<版本号>/`。
-- 自动创建并推送同名 Git tag（若已存在会跳过创建）。
 
 ---
 
 ## 常见问题
 
 - **程序能运行但登录失败**：优先检查 `user/passwd/ACID` 是否正确。
-- **OpenWrt 无法执行**：通常是架构选错或未 `chmod +x`。
-- **频繁重连**：可能是校园网出口波动，可稍后重试。
+- **OpenWrt 无法执行**：通常是架构选错或未赋予执行权限 `chmod +x`。
+- **Windows版频繁重连**：这是你的另一个设备无感认证导致的，不使用设备就关闭Wifi即可，使用Openwrt版可以避免
 
 ---
 
 ## 鸣谢
+登录部分基本是深大的代码
 [caterpie_szu_srun_client](https://github.com/Caterpie771881/szu_srun_client)
