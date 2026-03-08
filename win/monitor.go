@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"github.com/getlantern/systray"
 	"github.com/go-toast/toast"
 	"golang.org/x/sys/windows/registry"

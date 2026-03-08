@@ -10,9 +10,8 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"srunClient/encryptlib"
 	"time"
-
-	"srunClient/encryptlib" // 假设这是你的本地包
 
 	"gopkg.in/ini.v1"
 )
@@ -25,11 +24,12 @@ const (
 	URLChallenge = BaseURL + "/get_challenge"
 	URLPortal    = BaseURL + "/srun_portal"
 
-	Callback  = "jQueryCallback"
-	UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-	Type      = "1"
-	N         = "200"
-	Enc       = "srun_bx1"
+	Callback        = "jQueryCallback"
+	UserAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+	Type            = "1"
+	N               = "200"
+	Enc             = "srun_bx1"
+	AccountTemplate = "[default]\nuser=你的学号或账号\npasswd=你的密码\nACID=网关号码\n"
 )
 
 var httpClient = &http.Client{
@@ -131,9 +131,7 @@ func srunPortalLogin(username, password, acid, token, ip string) {
 	chkStr := encryptlib.Chkstr(token, username, hmd5Password, acid, ip, N, Type, info)
 	chksum := encryptlib.Sha1(chkStr)
 
-	// 使用 UnixMilli 更精准（Go 1.17+），或者保持你的写法
 	currentTime := fmt.Sprintf("%d", time.Now().UnixMilli())
-	//currentTime := fmt.Sprintf("%d000", time.Now().Unix())
 
 	v := url.Values{}
 	v.Set("action", "login")
@@ -176,6 +174,22 @@ func SrunLogin() {
 
 	log.Printf("[*] 正在加载配置文件: %s", accountPath)
 	// --------------------------------
+
+	if _, err := os.Stat(accountPath); err != nil {
+		if os.IsNotExist(err) {
+			if writeErr := os.WriteFile(accountPath, []byte(AccountTemplate), 0644); writeErr != nil {
+				log.Printf("[!] 创建 account.ini 失败: %v", writeErr)
+				sendNotification("配置文件创建失败", "无法在程序目录创建 account.ini，请检查写入权限")
+				return
+			}
+			log.Println("[!] 已创建 account.ini，请填写账号信息后重新运行")
+			sendNotification("已创建 account.ini", "请填写 user、passwd、ACID 后重试")
+			return
+		}
+
+		log.Printf("[!] 检查 account.ini 状态失败: %v", err)
+		return
+	}
 
 	cfg, err := ini.Load(accountPath)
 	if err != nil {
